@@ -40,7 +40,7 @@ turret.minable.result = "flamethrower-wagon"
 turret.attack_parameters.range = 30
 turret.attack_parameters.min_range = 2.5
 turret.attack_parameters.turn_range = 1
-turret.attack_parameters.lead_target_for_projectile_speed = 0.225 * 1.5
+--turret.attack_parameters.lead_target_for_projectile_speed = 0.225 * 1.5
 
 turret.prepare_range = 50
 turret.preparing_speed = 0.06
