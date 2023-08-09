@@ -35,7 +35,7 @@ end
 
 local turret = table.deepcopy(data.raw["fluid-turret"]["flamethrower-turret"])
 turret.name = "flamethrower-wagon-turret"
-turret.minable = table.deepcopy(data.raw["fluid-wagon"]["flamethrower-wagon"].minable)
+turret.minable = table.deepcopy(data.raw["fluid-wagon"]["flamethrower-wagon"].minableinable)
 
 turret.attack_parameters.range = 30
 turret.attack_parameters.min_range = 2.5
@@ -58,7 +58,7 @@ turret.collision_box = { { -0.75, -0.75 }, { 0.75, 0.75 } }
 turret.selection_box = { { -0.85, -0.85 }, { 0.85, 0.85 } }
 turret.drawing_box = { { -1.5, -2.5 }, { 1.5, 0 } }
 turret.selection_priority = 100
-turret.collision_mask = { "object-layer" }
+turret.collision_mask = { "train-layer" }
 turret.flags = {
     "player-creation",
     "placeable-off-grid",
