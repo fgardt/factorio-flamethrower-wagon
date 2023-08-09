@@ -1,10 +1,10 @@
 {
-  "name": "[internal-mod-name]",
+  "name": "flamethrower-wagon",
   "version": "0.0.0",
-  "title": "[MOD DISPLAY NAME]",
-  "author": "[YOUR MODS.FACTORIO.COM USERNAME]",
-  "homepage": "[HOMEPAGE/REPO URL]",
-  "description": "[SHORT DESCRIPTION]",
+  "title": "Flamethrower Wagon",
+  "author": "fgardt",
+  "homepage": "https://github.com/fgardt/factorio-flamethrower-wagon",
+  "description": "What do you get when you attach 2 flamethrowers to a train wagon? A flamethrower wagon of course!",
   "factorio_version": "1.1",
   "dependencies": [
     "base"
