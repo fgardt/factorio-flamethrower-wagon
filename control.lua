@@ -132,6 +132,8 @@ local function destroy_wagon(unit_number)
 end
 
 script.on_event(ev.on_entity_destroyed, function(event)
+    if not event.unit_number then return end
+
     destroy_wagon(event.unit_number)
 end)
 
