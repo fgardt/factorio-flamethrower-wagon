@@ -38,7 +38,6 @@ local recipe = table.deepcopy(data.raw.recipe["fluid-wagon"])
 recipe.name = "flamethrower-wagon"
 recipe.result = "flamethrower-wagon"
 recipe.localised_name = { "entity-name.flamethrower-wagon" }
-recipe.enabled = true
 recipe.ingredients = {
     { "fluid-wagon",         1 },
     { "flamethrower-turret", 2 },
