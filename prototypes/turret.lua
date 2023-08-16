@@ -36,6 +36,8 @@ end
 local turret = table.deepcopy(data.raw["fluid-turret"]["flamethrower-turret"])
 turret.name = "flamethrower-wagon-turret"
 turret.minable.result = "flamethrower-wagon"
+turret.minable.mining_time = data.raw["fluid-wagon"]["fluid-wagon"].minable.mining_time
+turret.mined_sound = data.raw["fluid-wagon"]["fluid-wagon"].mined_sound
 
 turret.attack_parameters.range = 30
 turret.attack_parameters.min_range = 2.5
