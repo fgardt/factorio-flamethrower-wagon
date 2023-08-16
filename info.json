@@ -7,6 +7,6 @@
   "description": "What do you get when you attach 2 flamethrowers to a train wagon? A flamethrower wagon of course!",
   "factorio_version": "1.1",
   "dependencies": [
-    "base"
+    "base >= 1.1.89"
   ]
 }
