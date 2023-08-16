@@ -151,21 +151,12 @@ script.on_event(ev.on_tick, function(_event)
             goto continue
         end
 
-        local front = wagon_data.front
-        local last_front_pos = wagon_data.last_front_pos
-        local current_front = wagon.train.front_stock ---@type LuaEntity
-
-        if front == current_front and last_front_pos == front.position then goto continue end
-
-        front = current_front
+        if wagon.speed == 0 then goto continue end
 
         local pos_a, pos_b = wagon_util.get_positions(wagon, horizontal_offset, vertical_offset)
 
         turret_a.teleport(pos_a)
         turret_b.teleport(pos_b)
-
-        wagon_data.front = front
-        wagon_data.last_front_pos = front.position
 
         ::continue::
     end
@@ -259,7 +250,7 @@ end)
 local function wagon_cloned(event)
     local new_wagon = event.destination
     local old_wagon = event.source
-    local old_data = global.wagons[old_wagon.unit_number]
+    local old_data = global.wagons[ old_wagon.unit_number --[[@as uint]] ]
     local old_turret_a = old_data.turret_a
     local old_turret_b = old_data.turret_b
 
@@ -307,14 +298,10 @@ local function wagon_cloned(event)
         return
     end
 
-    local front = new_wagon.train.front_stock ---@type LuaEntity
-
-    global.wagons[new_wagon.unit_number] = {
+    global.wagons[ new_wagon.unit_number --[[@as uint]] ] = {
         wagon = new_wagon,
         turret_a = new_turret_a,
         turret_b = new_turret_b,
-        front = front,
-        last_front_pos = front.position,
     }
 
     global.turret2wagon[new_turret_a.unit_number] = new_wagon.unit_number
