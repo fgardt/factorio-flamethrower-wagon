@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.6
+Date: 2023-08-17
+  Optimizations:
+    - roughly doubled performance thanks to new API addition (thanks to boskid)
+    - significantly improved performance when flamethrower wagons are standing still
+  Bugfixes:
+    - use correct mining time and sound for turrets
+---------------------------------------------------------------------------------------------------
 Version: 1.0.5
 Date: 2023-08-13
   Bugfixes:
