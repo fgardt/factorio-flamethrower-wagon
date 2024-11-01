@@ -5,6 +5,6 @@
 ---@field turret_a LuaEntity
 ---@field turret_b LuaEntity
 
----@class Global
+---@class Storage
 ---@field wagons table<uint, WagonData>
 ---@field turret2wagon table<uint, uint>

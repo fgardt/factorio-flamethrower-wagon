@@ -1,6 +1,6 @@
 local item = table.deepcopy(data.raw["item-with-entity-data"]["fluid-wagon"])
 item.name = "flamethrower-wagon"
-item.order = "a[train-system]-i[aaflamethrower-wagon]"
+item.order = "c[rolling-stock]-d[aaflamethrower-wagon]"
 item.place_result = "flamethrower-wagon"
 item.localised_name = { "entity-name.flamethrower-wagon" }
 item.localised_description = { "entity-description.flamethrower-wagon" }
@@ -36,13 +36,13 @@ fire_resistance.percent = 100
 
 local recipe = table.deepcopy(data.raw.recipe["fluid-wagon"])
 recipe.name = "flamethrower-wagon"
-recipe.result = "flamethrower-wagon"
+recipe.results = { { type = "item", name = "flamethrower-wagon", amount = 1 } }
 recipe.localised_name = { "entity-name.flamethrower-wagon" }
 recipe.ingredients = {
-    { "fluid-wagon",         1 },
-    { "flamethrower-turret", 2 },
-    { "engine-unit",         6 },
-    { "steel-plate",         10 },
+    { type = "item", name = "fluid-wagon",         amount = 1 },
+    { type = "item", name = "flamethrower-turret", amount = 2 },
+    { type = "item", name = "engine-unit",         amount = 6 },
+    { type = "item", name = "steel-plate",         amount = 10 },
 }
 
 local technology = table.deepcopy(data.raw.technology["flamethrower"])

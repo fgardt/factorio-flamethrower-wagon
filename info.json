@@ -5,8 +5,8 @@
   "author": "fgardt",
   "homepage": "https://github.com/fgardt/factorio-flamethrower-wagon",
   "description": "What do you get when you attach 2 flamethrowers to a train wagon? A flamethrower wagon of course!",
-  "factorio_version": "1.1",
+  "factorio_version": "2.0",
   "dependencies": [
-    "base >= 1.1.89"
+    "base"
   ]
 }

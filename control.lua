@@ -4,10 +4,10 @@ local horizontal_offset = 2
 local vertical_offset = -0.325
 
 local function init()
-    ---@type Global
-    global = global or {}
-    global.wagons = global.wagons or {}
-    global.turret2wagon = global.turret2wagon or {}
+    ---@type Storage
+    storage = storage or {}
+    storage.wagons = storage.wagons or {}
+    storage.turret2wagon = storage.turret2wagon or {}
 end
 
 script.on_init(init)
@@ -22,7 +22,7 @@ local ev = defines.events
 ---| EventData.script_raised_built
 ---| EventData.script_raised_revive
 local function wagon_built(event)
-    local entity = event.created_entity or event.entity
+    local entity = event.entity
 
     if not entity or not entity.valid then return end
     local surface = entity.surface
@@ -71,7 +71,7 @@ local function wagon_built(event)
 
     local front = entity.train.front_stock ---@type LuaEntity
 
-    global.wagons[entity.unit_number] = {
+    storage.wagons[entity.unit_number] = {
         wagon = entity,
         turret_a = turret_a,
         turret_b = turret_b,
@@ -79,13 +79,13 @@ local function wagon_built(event)
         last_front_pos = front.position,
     }
 
-    global.turret2wagon[turret_a.unit_number] = entity.unit_number
-    global.turret2wagon[turret_b.unit_number] = entity.unit_number
+    storage.turret2wagon[turret_a.unit_number] = entity.unit_number
+    storage.turret2wagon[turret_b.unit_number] = entity.unit_number
 
     -- no need to store registration number since wagons / turrets have a unit_number
-    script.register_on_entity_destroyed(entity)
-    script.register_on_entity_destroyed(turret_a)
-    script.register_on_entity_destroyed(turret_b)
+    script.register_on_object_destroyed(entity)
+    script.register_on_object_destroyed(turret_a)
+    script.register_on_object_destroyed(turret_b)
 end
 
 script.on_event(ev.on_built_entity, wagon_built, { { filter = "name", name = "flamethrower-wagon" } })
@@ -96,14 +96,14 @@ script.on_event(ev.script_raised_revive, wagon_built, { { filter = "name", name 
 
 ---@param unit_number uint
 local function destroy_wagon(unit_number)
-    local wagon_data = global.wagons[unit_number]
+    local wagon_data = storage.wagons[unit_number]
 
     if not wagon_data then
-        local wagon_id = global.turret2wagon[unit_number]
+        local wagon_id = storage.turret2wagon[unit_number]
 
         if not wagon_id then return end
 
-        wagon_data = global.wagons[wagon_id]
+        wagon_data = storage.wagons[wagon_id]
     end
 
     local wagon = wagon_data.wagon
@@ -115,31 +115,31 @@ local function destroy_wagon(unit_number)
     end
 
     if turret_a and turret_a.valid then
-        global.turret2wagon[turret_a.unit_number] = nil
+        storage.turret2wagon[turret_a.unit_number] = nil
         turret_a.destroy({
             raise_destroy = false,
         })
     end
 
     if turret_b and turret_b.valid then
-        global.turret2wagon[turret_b.unit_number] = nil
+        storage.turret2wagon[turret_b.unit_number] = nil
         turret_b.destroy({
             raise_destroy = false,
         })
     end
 
-    global.wagons[unit_number] = nil
+    storage.wagons[unit_number] = nil
 end
 
-script.on_event(ev.on_entity_destroyed, function(event)
-    if not event.unit_number then return end
+script.on_event(ev.on_object_destroyed, function(event)
+    if event.type ~= defines.target_type.entity then return end
 
-    destroy_wagon(event.unit_number)
+    destroy_wagon(event.useful_id)
 end)
 
 -- turret position updating
 script.on_event(ev.on_tick, function(_event)
-    for id, wagon_data in pairs(global.wagons) do
+    for id, wagon_data in pairs(storage.wagons) do
         local wagon = wagon_data.wagon
         local turret_a = wagon_data.turret_a
         local turret_b = wagon_data.turret_b
@@ -198,7 +198,7 @@ local function fill_turret(turret, fluid, amount)
 end
 
 script.on_nth_tick(30, function(_event)
-    for id, wagon_data in pairs(global.wagons) do
+    for id, wagon_data in pairs(storage.wagons) do
         local wagon = wagon_data.wagon
         local turret_a = wagon_data.turret_a
         local turret_b = wagon_data.turret_b
@@ -250,7 +250,7 @@ end)
 local function wagon_cloned(event)
     local new_wagon = event.destination
     local old_wagon = event.source
-    local old_data = global.wagons[ old_wagon.unit_number --[[@as uint]] ]
+    local old_data = storage.wagons[ old_wagon.unit_number --[[@as uint]] ]
     local old_turret_a = old_data.turret_a
     local old_turret_b = old_data.turret_b
 
@@ -298,19 +298,19 @@ local function wagon_cloned(event)
         return
     end
 
-    global.wagons[ new_wagon.unit_number --[[@as uint]] ] = {
+    storage.wagons[ new_wagon.unit_number --[[@as uint]] ] = {
         wagon = new_wagon,
         turret_a = new_turret_a,
         turret_b = new_turret_b,
     }
 
-    global.turret2wagon[new_turret_a.unit_number] = new_wagon.unit_number
-    global.turret2wagon[new_turret_b.unit_number] = new_wagon.unit_number
+    storage.turret2wagon[new_turret_a.unit_number] = new_wagon.unit_number
+    storage.turret2wagon[new_turret_b.unit_number] = new_wagon.unit_number
 
     -- no need to store registration number since wagons / turrets have a unit_number
-    script.register_on_entity_destroyed(new_wagon)
-    script.register_on_entity_destroyed(new_turret_a)
-    script.register_on_entity_destroyed(new_turret_b)
+    script.register_on_object_destroyed(new_wagon)
+    script.register_on_object_destroyed(new_turret_a)
+    script.register_on_object_destroyed(new_turret_b)
 
     destroy_wagon(old_wagon.unit_number)
 end
