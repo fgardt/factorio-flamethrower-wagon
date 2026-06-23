@@ -17,10 +17,10 @@ local ev = defines.events
 
 --- create turrets + store wagon info
 ---@param event
----| EventData.on_built_entity
----| EventData.on_robot_built_entity
----| EventData.script_raised_built
----| EventData.script_raised_revive
+--- | EventData.on_built_entity
+--- | EventData.on_robot_built_entity
+--- | EventData.script_raised_built
+--- | EventData.script_raised_revive
 local function wagon_built(event)
     local entity = event.entity
 
@@ -40,11 +40,12 @@ local function wagon_built(event)
         create_build_effect_smoke = false,
         direction = wagon_util.orientation2direction(orientation),
         raise_built = false,
+        quality = entity.quality
     })
 
     if turret_a == nil then
         entity.destroy({
-            raise_destroy = false,
+            raise_destroy = false
         })
         return
     end
@@ -57,17 +58,21 @@ local function wagon_built(event)
         create_build_effect_smoke = false,
         direction = wagon_util.orientation2direction(other_orient),
         raise_built = false,
+        quality = entity.quality
     })
 
     if turret_b == nil then
         turret_a.destroy({
-            raise_destroy = false,
+            raise_destroy = false
         })
         entity.destroy({
-            raise_destroy = false,
+            raise_destroy = false
         })
         return
     end
+
+    -- link turret fluidboxes together
+    turret_a.add_fluid_box_linked_connection(0, turret_b, 0)
 
     local front = entity.train.front_stock ---@type LuaEntity
 
@@ -76,7 +81,7 @@ local function wagon_built(event)
         turret_a = turret_a,
         turret_b = turret_b,
         front = front,
-        last_front_pos = front.position,
+        last_front_pos = front.position
     }
 
     storage.turret2wagon[turret_a.unit_number] = entity.unit_number
@@ -92,7 +97,6 @@ script.on_event(ev.on_built_entity, wagon_built, { { filter = "name", name = "fl
 script.on_event(ev.on_robot_built_entity, wagon_built, { { filter = "name", name = "flamethrower-wagon" } })
 script.on_event(ev.script_raised_built, wagon_built, { { filter = "name", name = "flamethrower-wagon" } })
 script.on_event(ev.script_raised_revive, wagon_built, { { filter = "name", name = "flamethrower-wagon" } })
-
 
 ---@param unit_number uint
 local function destroy_wagon(unit_number)
@@ -117,36 +121,34 @@ local function destroy_wagon(unit_number)
     if turret_a and turret_a.valid then
         storage.turret2wagon[turret_a.unit_number] = nil
         turret_a.destroy({
-            raise_destroy = false,
+            raise_destroy = false
         })
     end
 
     if turret_b and turret_b.valid then
         storage.turret2wagon[turret_b.unit_number] = nil
         turret_b.destroy({
-            raise_destroy = false,
+            raise_destroy = false
         })
     end
 
     storage.wagons[unit_number] = nil
 end
 
-script.on_event(ev.on_object_destroyed, function(event)
+script.on_event(ev.on_object_destroyed, function (event)
     if event.type ~= defines.target_type.entity then return end
 
     destroy_wagon(event.useful_id)
 end)
 
 -- turret position updating
-script.on_event(ev.on_tick, function(_event)
+script.on_event(ev.on_tick, function (_event)
     for id, wagon_data in pairs(storage.wagons) do
         local wagon = wagon_data.wagon
         local turret_a = wagon_data.turret_a
         local turret_b = wagon_data.turret_b
 
-        if not wagon or not wagon.valid or
-            not turret_a or not turret_a.valid or
-            not turret_b or not turret_b.valid then
+        if not wagon or not wagon.valid or not turret_a or not turret_a.valid or not turret_b or not turret_b.valid then
             destroy_wagon(id)
             goto continue
         end
@@ -166,20 +168,17 @@ end)
 
 --- fill the fluidbox of a fluid turret
 ---@param turret LuaEntity FluidTurret to fill
----@param fluid string Fluid name to use
----@param amount double Max amount available to fill with
+---@param fluid  string    Fluid name to use
+---@param amount double    Max amount available to fill with
 ---@return double transfer_amount Amount of fluid filled
 local function fill_turret(turret, fluid, amount)
     if amount == 0 then return 0 end
 
-    local max = turret.fluidbox.get_capacity(1)
-    local current = turret.fluidbox[1] --- @type Fluid
+    local max = turret.get_fluid_capacity(1)
+    local current = turret.get_fluid(1) ---@type Fluid
 
     if current == nil then
-        current = {
-            name = fluid,
-            amount = 0,
-        }
+        current = { name = fluid, amount = 0 }
     end
 
     local missing = max - current.amount
@@ -188,30 +187,22 @@ local function fill_turret(turret, fluid, amount)
 
     local transfer_amount = math.min(missing, amount)
 
-    turret.fluidbox[1] = {
-        name = fluid,
-        amount = current.amount + transfer_amount,
-        temperature = current.temperature
-    }
-
-    return transfer_amount
+    return turret.add_fluid(1, { name = current.name, amount = transfer_amount })
 end
 
-script.on_nth_tick(30, function(_event)
+script.on_nth_tick(30, function (_event)
     for id, wagon_data in pairs(storage.wagons) do
         local wagon = wagon_data.wagon
         local turret_a = wagon_data.turret_a
         local turret_b = wagon_data.turret_b
 
-        if not wagon or not wagon.valid or
-            not turret_a or not turret_a.valid or
-            not turret_b or not turret_b.valid then
+        if not wagon or not wagon.valid or not turret_a or not turret_a.valid or not turret_b or not turret_b.valid then
             destroy_wagon(id)
             goto continue
         end
 
-        local available --- @type double
-        local fluid     --- @type string
+        local available ---@type double
+        local fluid ---@type string
 
         for f, a in pairs(wagon.get_fluid_contents()) do
             fluid = f
@@ -220,29 +211,22 @@ script.on_nth_tick(30, function(_event)
 
         -- flush turrets if tank is empty
         if available == nil or available == 0 then
-            turret_a.fluidbox.flush(1)
-            turret_b.fluidbox.flush(1)
+            turret_a.clear_fluid(1)
+            turret_b.clear_fluid(1)
             goto continue
         end
 
         if fluid == nil then goto continue end
 
-        local transfer_a = fill_turret(turret_a, fluid, available)
-        local transfer_b = fill_turret(turret_b, fluid, available - transfer_a)
-
-        local removed = transfer_a + transfer_b
+        local removed = fill_turret(turret_a, fluid, available)
 
         if removed > 0 then
-            wagon.remove_fluid({
-                name = fluid,
-                amount = removed,
-            })
+            wagon.remove_fluid(1, removed)
         end
 
         ::continue::
     end
 end)
-
 
 -- handle cloning
 
@@ -254,10 +238,9 @@ local function wagon_cloned(event)
     local old_turret_a = old_data.turret_a
     local old_turret_b = old_data.turret_b
 
-    if not old_turret_a or not old_turret_a.valid or
-        not old_turret_b or not old_turret_b.valid then
+    if not old_turret_a or not old_turret_a.valid or not old_turret_b or not old_turret_b.valid then
         event.destination.destroy({
-            raise_destroy = false,
+            raise_destroy = false
         })
         destroy_wagon(old_wagon.unit_number)
         return
@@ -269,12 +252,12 @@ local function wagon_cloned(event)
         position = pos_a,
         surface = new_wagon.surface,
         force = new_wagon.force,
-        create_build_effect_smoke = false,
+        create_build_effect_smoke = false
     })
 
     if not new_turret_a or not new_turret_a.valid then
         event.destination.destroy({
-            raise_destroy = false,
+            raise_destroy = false
         })
         destroy_wagon(old_wagon.unit_number)
         return
@@ -284,15 +267,15 @@ local function wagon_cloned(event)
         position = pos_b,
         surface = new_wagon.surface,
         force = new_wagon.force,
-        create_build_effect_smoke = false,
+        create_build_effect_smoke = false
     })
 
     if not new_turret_b or not new_turret_b.valid then
         new_turret_a.destroy({
-            raise_destroy = false,
+            raise_destroy = false
         })
         event.destination.destroy({
-            raise_destroy = false,
+            raise_destroy = false
         })
         destroy_wagon(old_wagon.unit_number)
         return
@@ -301,7 +284,7 @@ local function wagon_cloned(event)
     storage.wagons[ new_wagon.unit_number --[[@as uint]] ] = {
         wagon = new_wagon,
         turret_a = new_turret_a,
-        turret_b = new_turret_b,
+        turret_b = new_turret_b
     }
 
     storage.turret2wagon[new_turret_a.unit_number] = new_wagon.unit_number

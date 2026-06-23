@@ -28,7 +28,8 @@ entity.selected_minimap_representation = {
 }
 entity.allow_passengers = false
 entity.tank_count = 1
-entity.capacity = 8000
+entity.capacity = 5000
+entity.quality_affects_capacity = true
 entity.max_health = 800
 local fire_resistance = entity.resistances[1]
 fire_resistance.decrease = nil
@@ -39,19 +40,13 @@ recipe.name = "flamethrower-wagon"
 recipe.results = { { type = "item", name = "flamethrower-wagon", amount = 1 } }
 recipe.localised_name = { "entity-name.flamethrower-wagon" }
 recipe.ingredients = {
-    { type = "item", name = "fluid-wagon",         amount = 1 },
-    { type = "item", name = "flamethrower-turret", amount = 2 },
-    { type = "item", name = "engine-unit",         amount = 6 },
-    { type = "item", name = "steel-plate",         amount = 10 },
+    { type = "item", name = "fluid-wagon", amount = 1 }, { type = "item", name = "flamethrower-turret", amount = 2 },
+    { type = "item", name = "engine-unit", amount = 6 }, { type = "item", name = "steel-plate", amount = 10 }
 }
 
 local technology = table.deepcopy(data.raw.technology["flamethrower"])
 technology.name = "flamethrower-wagon"
-technology.prerequisites = {
-    "fluid-wagon",
-    "flamethrower",
-    "chemical-science-pack",
-}
+technology.prerequisites = { "fluid-wagon", "flamethrower", "chemical-science-pack" }
 technology.icon = "__flamethrower-wagon__/graphics/technology.png"
 technology.icon_size = 256
 technology.icon_mipmaps = 4
@@ -59,9 +54,9 @@ technology.unit = {
     count = 350,
     ingredients = {
         { "automation-science-pack", 1 },
-        { "logistic-science-pack",   1 },
-        { "chemical-science-pack",   1 },
-        { "military-science-pack",   1 }
+        { "logistic-science-pack", 1 },
+        { "chemical-science-pack", 1 },
+        { "military-science-pack", 1 }
     },
     time = 30
 }
